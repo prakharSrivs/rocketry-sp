@@ -7,7 +7,6 @@ const CustomLineChart = ({
     width,
     height,
     xLabels=[],
-
 }) => {
 
   return (
@@ -16,7 +15,7 @@ const CustomLineChart = ({
             width={width}
             height={height}
             series={[...seriesData]}
-            xAxis={[{ scaleType: 'point', data: xLabels }]}
+            xAxis={xLabels.length===0 ? null : xLabels}
         />
     </Grid>
   )

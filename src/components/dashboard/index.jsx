@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import CustomLineChart from '../line-chart'
 import CentralConsole from '../central-console';
 import StatusCard from '../status-card';
+import axios from 'axios';
 
 const styles = {
   cardStyles:{
@@ -30,33 +31,67 @@ const styles = {
 
 const Dashboard = () => {
 
+  const [accXData, setAccXData] = useState([]);
+  const [accYData, setAccYData] = useState([]);
+  const [accZData, setAccZData] = useState([]);
+  const [altiData, setAltiData] = useState([]);
+
   const newTheme = createTheme({ palette: { mode: "dark" } });
-  const xData = [5, 4.5, 4.6, 5.5, 6.6, 5, 4];
-  const yData = [5, 4.5, 4.6, 5.5, 6.6, 5, 4];
-  const zData = [10, 20, 30, 45, 55, 60, 90];
-  const accData = [0,10,15, 20, 30, 35, 50];
+
   const seriesXData = [         
-    { data: xData, label: `Position(X) ${xData[xData.length-1]}m` },
+    { data: accXData, label: `Acc(X) ${accXData[accXData.length-1]}m` },
   ];
   const seriesYData = [
-    { data: yData, label: `Position(Y) ${yData[yData.length-1]}m` }
+    { data: accYData, label: `Acc(Y) ${accYData[accYData.length-1]}m` }
   ]
   const seriesZData = [
-    { data: zData, label: `Position(Z) ${zData[zData.length-1]}m` }
-  ]
-  const seriesAccData = [
-    { data: accData, label: `Acc ${accData[accData.length-1]}m/s` }
-  ]
-  const xLabels = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
+    { data: accZData, label: `Acc(Z) ${accZData[accZData.length-1]}m` }
   ]
 
+  const altitudeData = [
+    { data: altiData, label: `Altitude ${altiData[altiData.length-1]}` }
+  ]
+
+  const accSeriesData = [
+    { data:accXData, label: `Acc(X) ${accXData[accXData.length-1]}m` },
+    { data:accYData, label: `Acc(Y) ${accYData[accYData.length-1]}m` },
+    { data:accZData, label: `Acc(Z) ${accZData[accZData.length-1]}m` }
+  ]
+
+  useEffect(()=>{
+
+    const updateAccData = async()=>{
+      const response = await axios.get("http://localhost:4400/accel");
+      let tempX = accXData;
+      let tempY = accYData;
+      let tempZ = accZData; 
+      tempX.push(response.data.accX);
+      tempY.push(response.data.accY);
+      tempZ.push(response.data.accZ);
+      setAccXData([...tempX]);
+      setAccYData([...tempY]);
+      setAccZData([...tempZ]);
+    }
+
+    const updateAltitudeData = async()=>{
+      const response = await axios.get("http://localhost:4400/alti")
+      let tempA = altiData;
+      tempA.push(response.data.altitude);
+      setAltiData(tempA);
+    }
+
+    const updateAttributes = ()=>{
+      updateAccData();
+      updateAltitudeData();
+    }
+
+    const accTimeInterval = setInterval(updateAttributes,1000);
+
+    return ()=>{
+      clearInterval(accTimeInterval);
+    }
+
+  },[])
 
   return (
     <ThemeProvider theme={newTheme}>
@@ -65,7 +100,6 @@ const Dashboard = () => {
       <Card sx={styles.cardStyles}>
         <CustomLineChart 
           seriesData={seriesXData}
-          xLabels={[...xLabels]}
           width={500}
           height={300}
           sx={{color:"#CDCDCD !important"}}
@@ -74,7 +108,6 @@ const Dashboard = () => {
       <Card sx={styles.cardStyles}>
         <CustomLineChart 
           seriesData={seriesYData}
-          xLabels={[...xLabels]}
           width={500}
           height={300}
           sx={{color:"#CDCDCD !important"}}
@@ -83,7 +116,6 @@ const Dashboard = () => {
       <Card sx={styles.cardStyles}>
         <CustomLineChart 
           seriesData={seriesZData}
-          xLabels={[...xLabels]}
           width={500}
           height={300}
           sx={{color:"#CDCDCD !important"}}
@@ -91,8 +123,7 @@ const Dashboard = () => {
       </Card>
       <Card sx={styles.cardStyles}>
         <CustomLineChart 
-          seriesData={seriesAccData}
-          xLabels={[...xLabels]}
+          seriesData={altitudeData}
           width={500}
           height={300}
           sx={{color:"#CDCDCD !important"}}
