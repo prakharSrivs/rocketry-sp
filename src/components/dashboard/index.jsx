@@ -35,21 +35,22 @@ const Dashboard = () => {
   const [accYData, setAccYData] = useState([]);
   const [accZData, setAccZData] = useState([]);
   const [altiData, setAltiData] = useState([]);
+  const [lowerBoundAltiData, setLowerBoundAltiData] = useState(0);
 
   const newTheme = createTheme({ palette: { mode: "dark" } });
 
   const seriesXData = [         
-    { data: accXData, label: `Acc(X) ${accXData[accXData.length-1]}m` },
+    { data: accXData, label: `Acc(X) ${accXData[accXData.length-1]}m`, showMark: false },
   ];
   const seriesYData = [
-    { data: accYData, label: `Acc(Y) ${accYData[accYData.length-1]}m` }
+    { data: accYData, label: `Acc(Y) ${accYData[accYData.length-1]}m`, showMark: false }
   ]
   const seriesZData = [
-    { data: accZData, label: `Acc(Z) ${accZData[accZData.length-1]}m` }
+    { data: accZData, label: `Acc(Z) ${accZData[accZData.length-1]}m`, showMark: false }
   ]
 
   const altitudeData = [
-    { data: altiData, label: `Altitude ${altiData[altiData.length-1]}` }
+    { data: altiData, label: `Altitude ${altiData[altiData.length-1]} cm`, showMark: false}
   ]
 
   const accSeriesData = [
@@ -65,9 +66,9 @@ const Dashboard = () => {
       let tempX = accXData;
       let tempY = accYData;
       let tempZ = accZData; 
-      tempX.push(response.data.accX);
+      tempX.push(response.data.accZ);
       tempY.push(response.data.accY);
-      tempZ.push(response.data.accZ);
+      tempZ.push(response.data.accX);
       setAccXData([...tempX]);
       setAccYData([...tempY]);
       setAccZData([...tempZ]);
@@ -76,7 +77,7 @@ const Dashboard = () => {
     const updateAltitudeData = async()=>{
       const response = await axios.get("http://localhost:4400/alti")
       let tempA = altiData;
-      tempA.push(response.data.altitude);
+      tempA.push(response.data.altitude*100);
       setAltiData(tempA);
     }
 
@@ -85,7 +86,7 @@ const Dashboard = () => {
       updateAltitudeData();
     }
 
-    const accTimeInterval = setInterval(updateAttributes,1000);
+    const accTimeInterval = setInterval(updateAttributes,200);
 
     return ()=>{
       clearInterval(accTimeInterval);
